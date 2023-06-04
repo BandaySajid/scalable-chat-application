@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime-ChatApp | <%= pageTitle %>
+    </title>
+    <%- include('partials/bootstrap.ejs') %>
+</head>
+
+<body>
+    <div id="alert-container"></div>
+
+    <div class="container my-4">
+        <form class="login-form" onsubmit="submitLogin(event)">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" required class="form-control" name="email" id="email"
+                    placeholder="name@example.com">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" required class="form-control" name="password" id="password"
+                    placeholder="Enter your password">
+            </div>
+
+            <div class="container text-center">
+                <button class="btn btn-success">Login</button>
+                <hr>
+                <hp>Create an account ?<span><a href="/signup" style="text-decoration: none;"> Sign up</a></span></hp>
+            </div>
+        </form>
+    </div>
+    <script src="js/login.js"></script>
+    <script src="js/alert.js"></script>
+</body>
+
+</html>

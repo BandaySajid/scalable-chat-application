@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime-ChatApp | <%= pageTitle%>
+    </title>
+    <%- include('partials/bootstrap.ejs') %>
+        <link rel="stylesheet" href="css/chat.css">
+</head>
+
+<body>
+    <div id="alert-container" style=" position: absolute; z-index: 999; top:0; left:0; right: 0; margin: 0 auto; width: 50%;">
+
+    </div>
+    <div class="d-flex container-fluid" style="background-color: #343541;">
+        <button id='sidebar-button' name="sidebar-button" class="btn btn-dark position-fixed m-2 text-white"
+            onclick="handleSideBar()" type="button">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="chat-navbar ">
+            <div class="d-flex flex-column flex-shrink-0 p-3 bg-dark screen-size-container" style="width: 280px;">
+                <h1 class="d-flex justify-content-center flex-column text-decoration-none text-center gap-3">
+                    <span class="fs-6 text-white mb-1"><span class="text-warning">Id : </span><%= roomId%></span>
+                    <span class="fs-6 text-danger mb-1">Room-admin : <span class="text-success">
+                            <%= admin%>
+                        </span></span>
+                    <span class="fs-6 text-warning mb-1">Users</span>
+                </h1>
+                <ul class="chat-sidebar room-user-list flex-column mb-auto">
+
+                    <% for(var i=0; i<roomUsers.length; i++) {%>
+                        <div class="room-user-item">
+                            <li class="nav-item joined-room-item">
+                                <h1 class="nav-link text-white">
+                                    <%= roomUsers[i]%>
+                                </h1>
+                            </li>
+                            <hr style="color: white;">
+                        </div>
+
+                        <% } %>
+                </ul>
+
+            </div>
+        </div>
+
+        <div class="chat-screen w-100 container">
+            <div class="container-fluid-flex flex-column chat-container p-4" style=" overflow: auto;">
+                <div class='msgContainer p-2 container' id='chat-screen' style="border-radius: 5px; ">
+
+                    <% messages.forEach(function(messageInfo){ %>
+                        <% if(messageInfo.isOpponent){ %>
+                            <div class="card border-0 my-1">
+                                <div class="card-body">
+                                    <div class="ms-auto">
+                                        <p id="message-sender" class="card-title">
+                                            <span class='text-danger'>
+                                                <%= messageInfo.username%>
+                                            </span>
+                                            <span id='message-time' class='small' style="color: grey">
+                                                <%= messageInfo.sentAt%>
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div class="message-wrapper">
+                                        <p id='message-text' class="card-text small text-white">
+                                            <%= messageInfo.message%>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <% } else{ %>
+                                <div class="card border-0 my-1 me-auto">
+                                    <div class="card-body ms-auto d-flex flex-column">
+                                        <div class="ms-auto">
+                                            <p id="message-sender" class="card-title float-end">
+                                                <span class='text-success'>You</span>
+                                                <span id='message-time' class='small' style="color: grey">
+                                                    <%= messageInfo.sentAt%>
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <div class="message-wrapper">
+                                            <p id='message-text' class="card-text small text-white"
+                                                style="text-align: right">
+                                                <%= messageInfo.message%>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% } %>
+                                    <% }); %>
+
+                </div>
+                <div class="message-form-container d-flex justify-content-center" id='message-form-container'>
+                    <form class='input-group' onsubmit="sendMessage(event)">
+                        <textarea required name="message" type="text" id='message-area'
+                            style="resize: none; height: 10px; border: none; background-color: #40414F;"
+                            class="form-control text-center text-white" placeholder="Enter your message"
+                            aria-label="message" aria-describedby="basic-addon2"></textarea>
+                        <button style="background-color: #8E8EA0; border: none;" class="input-group-text"
+                            id="basic-addon2"><svg stroke="currentColor" class='send-icon' fill="currentColor"
+                                strokeWidth="0" viewBox="0 0 20 20" height="1em" width="1em"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z">
+                                </path>
+                            </svg></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+<script src="js/chat.js"></script>
+<script>
+    let sidebar = document.querySelector('.chat-navbar');
+    function handleSideBar() {
+        sidebar.classList.toggle('active');
+    }
+</script>
+
+</html>

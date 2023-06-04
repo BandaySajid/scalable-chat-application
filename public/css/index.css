@@ -1,0 +1,71 @@
+.chat-navbar {
+    margin-left: -300px;
+    transition: 0.4s;
+}
+
+.active {
+    position: absolute;
+    z-index: 9;
+    margin-left: 0;
+}
+
+
+
+.screen-size-container {
+    height: 100vh;
+}
+
+.owned-room-list {
+    overflow-y: scroll;
+    height: 50%;
+}
+
+.joined-room-list {
+    overflow-y: scroll;
+    height: 50%;
+}
+
+#sidebar-button {
+    display: block;
+    z-index: 1000;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background-color: #8495a7;
+}
+.joined-room-item, .owned-room-item{
+    background-color: #0e2237;
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom : 2px;
+}
+
+.leaveBtn, .joinBtn{
+    font-size: 10px;
+    font-weight: bold;
+}
+
+@media screen and (max-width: 992px) {
+    #sidebar-button {
+        display: block;
+        z-index: 1000;
+    }
+
+}
+
+@media screen and (min-width: 992px) {
+    #sidebar-button {
+        display: none;
+    }
+
+    .chat-navbar {
+        margin-left: 0;
+        transition: 0.4s;
+    }
+}

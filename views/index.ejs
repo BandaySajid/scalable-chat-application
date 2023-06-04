@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime-ChatApp</title>
+    <%- include('partials/bootstrap.ejs') %>
+        <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+    <div id="alert-container">
+
+    </div>
+    <div class="d-flex">
+        <button id='sidebar-button' name="sidebar-button" class="btn btn-dark position-fixed m-2 text-white"
+            onclick="handleSideBar()" type="button">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="chat-navbar">
+            <div class="d-flex flex-column flex-shrink-0 p-3 bg-dark screen-size-container" style="width: 280px;">
+                <h1 class="d-flex justify-content-center flex-column text-decoration-none text-center">
+                    <span class="fs-6 text-warning mb-1">Joined Rooms</span>
+                </h1>
+                <ul class="chat-sidebar joined-room-list flex-column mb-auto text-center">
+                    <% for(var i=0; i<joinedRooms.length; i++) {%>
+                        <li class="nav-item joined-room-item">
+                            <h1 class="nav-link text-white">
+                                <%= joinedRooms[i]%>
+                            </h1>
+                            <button class="btn btn-success btn-sm joinBtn">JOIN</button> <button
+                                class="btn btn-danger btn-sm leaveBtn" onclick="leaveRoom(event)">DELETE</button>
+                        </li>
+                        <% } %>
+                </ul>
+
+                <hr style="color: white;">
+
+
+                <h1 class="d-flex justify-content-center flex-column text-decoration-none text-center">
+                    <span class="fs-6 text-warning mb-1">Owned Rooms</span>
+                </h1>
+                <ul class="chat-sidebar owned-room-list flex-column mb-auto text-center">
+                    <% for(var i=0; i<ownedRooms.length; i++) {%>
+                        <li class="nav-item joined-room-item">
+                            <h1 class="nav-link text-white">
+                                <%= ownedRooms[i]%>
+                            </h1>
+                            <button class="btn btn-success btn-sm joinBtn">JOIN</button> <button
+                                class="btn btn-danger btn-sm leaveBtn" onclick="leaveRoom(event)">DELETE</button>
+                        </li>
+                        <% } %>
+                </ul>
+            </div>
+        </div>
+
+        <div class="mainContainer w-100 text-center d-flex align-items-center justify-content-center">
+            <div class="itemContainer">
+                <a class="btn btn-outline-success" href="/joinRoom">Join a new room</a>
+                <a class="btn btn-outline-danger" href="/createRoom">Create a new room</a>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="js/index.js"></script>
+<script src="js/alert.js"></script>
+
+</html>

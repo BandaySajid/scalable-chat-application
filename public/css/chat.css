@@ -1,0 +1,94 @@
+body {
+    overflow-y: hidden;
+}
+
+.chat-navbar {
+    margin-left: -300px;
+    transition: 0.4s;
+}
+
+.active {
+    position: absolute;
+    z-index: 9;
+    margin-left: 0;
+}
+
+.screen-size-container {
+    height: 100vh;
+}
+
+.room-user-list {
+    overflow-y: scroll;
+    height: 100%;
+}
+
+#sidebar-button {
+    display: block;
+    z-index: 1000;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background-color: #8495a7;
+}
+
+.room-user-item {
+    /* background-color: #0e2237;
+    border-radius: 10px;
+    padding: 5px; */
+    margin-bottom: 2px;
+}
+
+@media screen and (max-width: 992px) {
+    #sidebar-button {
+        display: block;
+        z-index: 1000;
+    }
+
+}
+
+@media screen and (min-width: 992px) {
+    #sidebar-button {
+        display: none;
+    }
+
+    .chat-navbar {
+        margin-left: 0;
+        transition: 0.4s;
+    }
+}
+
+.send-icon {
+    transform: rotate(90deg);
+}
+
+.message-form-container {
+    padding-top: 10px;
+    overflow-y: scroll;
+}
+
+.msgContainer {
+    height: 80vh;
+    overflow-y: scroll;
+
+}
+
+.card {
+    background-color: #343541;
+}
+
+.message-wrapper{
+    width : 35vh;
+}
+
+#message-text{
+    width: 100%;
+    overflow-y: scroll;
+}
+
+

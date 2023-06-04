@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime-ChatApp | <%= pageTitle %>
+    </title>
+    <%- include('partials/bootstrap.ejs') %>
+</head>
+
+<body>
+    <div id="alert-container">
+
+    </div>
+    <div class="container my-4 text-center">
+        <form class="form-container" onsubmit="createRoom(event)">
+            <div class="mb-3">
+                <label for="room-id" class="form-label">Room ID</label>
+                <input type="text" class="form-control" id="room-id" placeholder="Enter room id">
+            </div>
+            <hr>
+            <div class="container text-center">
+                <button class="btn btn-danger">Create</button>
+                <hr>
+                <p>Want to join a room ?<span><a href="/joinRoom" style="text-decoration: none;"> Join</a></span>
+                </p>
+            </div>
+        </form>
+    </div>
+    <script src="js/createRoom.js"></script>
+    <script src="js/alert.js"></script>
+
+</body>
+
+</html>
