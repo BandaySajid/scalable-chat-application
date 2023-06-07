@@ -3,11 +3,35 @@ const router = express.Router();
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const auth = require('../middleware/auth');
+const { auth, redirectIfLoggedIn } = require('../middlewares/auth');
 const validateUpdates = require('../utils/validateUpdates');
-const { saveSessionCache, deleteSessionCache } = require('../utils/redisFunctions');
+const { saveSession, deleteSession } = require('../utils/redisFunctions');
+const { getUserRooms } = require('../models/room');
+
+router.get('/', auth, async (req, res) => {
+    try {
+        const joinedRooms = await getUserRooms(req.user.userId, 'joined');
+        const ownedRooms = await getUserRooms(req.user.userId, 'owned');
+        res.render('index', {
+            joinedRooms,
+            ownedRooms
+        });
+    }
+    catch (err) {
+        res.status(500).json({
+            "error": "an error occured"
+        })
+    }
+});
+
 
 //signup
+router.get('/signup', redirectIfLoggedIn, async (req, res) => {
+    res.render('signup', {
+        pageTitle: 'signup',
+    });
+});
+
 router.post('/signup', async (req, res) => {
     try {
         const user = await User.create(req.body);
@@ -21,10 +45,11 @@ router.post('/signup', async (req, res) => {
         const token = jwt.sign(newUser, process.env.JWT_SECRET);
 
         //saving session cache to redis
-        const sessionId = await saveSessionCache(newUser.userId, token, 400); // expiring after 400 seconds;
+        const sessionId = await saveSession(newUser.userId, token, 43200); // expiring after 5 days;
 
 
-        res.cookie('authorization', sessionId, { signed: true });
+        res.cookie('authorization', sessionId, {sameSite : true, secure : true });
+        res.cookie('username', newUser.username, {sameSite : true, secure : true });
 
         res.status(201).json({
             status: 'user signed up successfully',
@@ -42,6 +67,12 @@ router.post('/signup', async (req, res) => {
 });
 
 //login
+router.get('/login', redirectIfLoggedIn, async (req, res) => {
+    res.render('login', {
+        pageTitle: 'login'
+    });
+});
+
 router.post('/login', async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -64,7 +95,10 @@ router.post('/login', async (req, res) => {
         }
 
         if (!user) {
-            throw new Error('user not found');
+            return res.status(404).json({
+                status: 'error',
+                description: 'user does not exist'
+            });
         }
 
         await user.compareHash(password);
@@ -77,11 +111,13 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign(newUser, process.env.JWT_SECRET);
 
         //saving session cache to redis
-        const sessionId = await saveSessionCache(newUser.userId, token, 400); // expiring after 400 seconds;
+        const sessionId = await saveSession(newUser.userId, token, 43200); // expiring after 5 days;
 
         console.log(sessionId)
 
-        res.cookie('authorization', sessionId, { signed: true });
+        res.cookie('authorization', sessionId, { sameSite : true, secure : true });
+        res.cookie('username', newUser.username, {sameSite : true, secure : true });
+
 
         res.status(201).json({
             status: 'user logged in successfully',
@@ -97,6 +133,8 @@ router.post('/login', async (req, res) => {
         });
     };
 });
+
+
 
 //Update
 router.put('/updateUser', auth, async (req, res) => {
@@ -141,7 +179,8 @@ router.put('/updateUser', auth, async (req, res) => {
 //Logout
 router.get('/logout', auth, async (req, res) => {
     try {
-        await deleteSessionCache(req, 'logout');
+        await deleteSession(req, 'logout');
+        res.clearCookie('authorization');
         res.status(200).json({
             status: 'success',
             description: 'user logged out'
@@ -156,11 +195,26 @@ router.get('/logout', auth, async (req, res) => {
     };
 });
 
+router.get('/logoutFromAll', auth, async (req, res) => {
+    try {
+        await deleteSession(req, 'logoutFromAll');
+        res.clearCookie('authorization');
+        return res.redirect('/login');
+    }
+    catch (err) {
+        const errMsg = err.message;
+        return res.status(500).json({
+            status: 'error',
+            description: errMsg
+        });
+    }
+});
+
 //Delete
 router.delete('/deleteUser', auth, async (req, res) => {
     try {
-        await deleteSessionCache(req, 'deleteUser');
-
+        await deleteSession(req, 'deleteUser');
+        res.clearCookie('authorization');
         const deletedUser = await User.destroy({
             where: {
                 userId: req.user.userId

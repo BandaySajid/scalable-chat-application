@@ -9,8 +9,10 @@ const roomRouter = require('./routes/room');
 const chatRouter = require('./routes/chat');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const Room = require('./models/room');
-require('./db/mongoose');
+const { ensureAuth } = require('./middlewares/auth');
+const { roomUserAuthenticated } = require('./models/room');
+const { roomEvent, saveMessage } = require('./models/room');
+const redis = require('./db_config/redis');
 require('dotenv').config();
 
 const app = express();
@@ -19,7 +21,7 @@ app.use(express.static(publicPath));
 app.set('views', viewsPath);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser('cookieSecret'));
 app.use(cors({
     origin: '*'
 }));
@@ -31,19 +33,107 @@ const httpServer = app.listen(PORT, () => {
     console.log("Server is up on http://127.0.0.1:" + PORT);
 });
 
+//redis-subscriber connection
+const subscriber = redis.duplicate();
+subscriber.on('error', (err) => {
+    console.log('error with redis subscriber : ' + err.message);
+});
+
 const wsS = new WebSocketServer({
     server: httpServer
 });
 
+// httpServer.on('upgrade', async (request, socket, head) => {
+
+//     try {
+//         // cookieParser()(req, async () => {
+//         //     const { authenticated } = await ensureAuth(req);
+//         //     if (!authenticated) {
+//         //         socket.destroy();
+//         //     }
+//         // });
+
+//         wsS.handleUpgrade(request, socket, head, function done(ws) {
+//             wsS.emit('connection', ws, request);
+//         });
+//     } catch (e) {
+//         console.log(e.message);
+//     }
+// })
+
+wsS.on('listening', async () => {
+    //connection new subscriber
+    await subscriber.connect();
+});
+
+//redis listener
+
 const rooms = {
 
-}
+};
+
+//pub-sub
+const listener = async (message, channel) => {
+    const socketId = message.socketId;
+    delete message.socket;
+    console.log(message, channel);
+    if (JSON.parse(message).status === 'join') {
+        rooms[channel].clients.forEach((client) => {
+            if (client.socket.id !== socketId) {
+                client.socket.send(message);
+            }
+        });
+    }
+    else if (JSON.parse(message).status === 'left') {
+        rooms[channel].clients.forEach((client) => {
+            if (client.socket.id !== socketId) {
+                client.socket.send(message);
+            }
+        });
+    }
+    else {
+        rooms[channel].clients.forEach((client) => {
+            client.socket.send(message);
+        });
+        await saveMessage(channel, message);
+    }
+};
+
+roomEvent.on('create', async function (roomId) {
+    console.log('room created');
+    subscriber.subscribe(roomId, listener);
+});
+
+roomEvent.on('delete', async function (roomId) {
+    subscriber.unsubscribe(roomId, listener);
+});
+
 
 //Socket Handling
-wsS.on('connection', (socket, req) => {
-    const cookies = req.headers.cookie.split('; ');
-    const usernameCookie = cookies[1].split('=')[1];
-    const currentRoom = cookies[2].split('=')[1];
+wsS.on('connection', async (socket, req) => {
+    let usernameCookie, currentRoom;
+    try {
+        const cookies = req.headers.cookie.split('; ');
+        cookies.map((cookie, i)=>{
+            if(cookie.includes('username')){
+                usernameCookie = cookie.split('=')[1];
+            }
+            if(cookie.includes('currentRoom')){
+                currentRoom = cookie.split('=')[1];
+            }
+        })
+        console.log(cookies)
+    }
+    catch (err) {
+        console.log(err);
+    };
+
+    const isRoomUserAuthenticated = await roomUserAuthenticated(currentRoom, usernameCookie);
+
+    if (!isRoomUserAuthenticated) {
+        console.log('not authenticated room');
+        socket.close(1000, 'unauthorized room user, user not a part of this room');
+    }
 
     if (!rooms[currentRoom]) {
         Object.assign(rooms, { [currentRoom]: { clients: [] } });
@@ -54,32 +144,27 @@ wsS.on('connection', (socket, req) => {
         socket
     });
 
-    rooms[currentRoom].clients.forEach((client) => {
-        if(client.socket !== socket){
-            client.socket.send(JSON.stringify({
-                status : 'join',
-                message : `${usernameCookie} has joined the room`
-            }));
-        }
-    });
+    await redis.publish(currentRoom, JSON.stringify({
+        status: 'join',
+        message: `${usernameCookie} has joined the room`,
+        socketId: socket.id
+    }));
 
     console.log('a client connected to websockets');
-    socket.on('message', (message) => {
-        const parsedMsg = JSON.parse(message.toString());
-        rooms[currentRoom].clients.forEach((client) => {
-            client.socket.send(JSON.stringify(parsedMsg));
-        })
+    socket.on('message', async (message) => {
+        await redis.publish(currentRoom, JSON.stringify(JSON.parse(message.toString('utf-8'))));
     });
 
-    socket.on('close', () => {
-        rooms[currentRoom].clients.forEach((client) => {
-            if(client.socket !== socket){
-                client.socket.send(JSON.stringify({
-                    status : 'left',
-                    message : `${usernameCookie} has left the room`
-                }));
-            }
-        });
+    socket.on('close', async (code) => {
+        console.log(code);
+        if (code === 1000) {
+            return
+        }
+        await redis.publish(currentRoom, JSON.stringify({
+            status: 'left',
+            message: `${usernameCookie} has left the room`,
+            socket
+        }));
 
         rooms[currentRoom].clients = rooms[currentRoom].clients.filter((client) => {
             return client.socket !== socket;

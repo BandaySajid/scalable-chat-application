@@ -152,6 +152,6 @@ router.get('/logoutFromAll', auth, async (req, res) => {
             description: errMsg
         });
     }
-})
+});
 
 module.exports = router;

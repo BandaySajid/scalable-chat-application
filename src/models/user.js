@@ -1,8 +1,6 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require('../db_config/mysql');
 const bcrypt = require('bcrypt');
-const Post = require('./post');
-const Like = require('./like');
 
 const User = sequelize.define('user', {
     userId: {
@@ -36,35 +34,6 @@ const User = sequelize.define('user', {
 }, {
 });
 
-Post.belongsTo(User, {
-    foreignKey: {
-        name: 'userId'
-    }
-});
-
-User.hasMany(Post, {
-    as: 'posts',
-    foreignKey: 'userId'
-});
-
-Like.belongsTo(Post, {
-    foreignKey: {
-        name: 'postId'
-    }
-});
-
-Like.belongsTo(User, {
-    foreignKey: {
-        name: 'userId'
-    }
-});
-
-Post.hasMany(Like, {
-    as: 'likes',
-    foreignKey: 'postId'
-});
-
-
 User.beforeCreate(async (user) => {
     const hashedPassword = await bcrypt.hash(user.password, 10);
     user.password = hashedPassword;
@@ -91,4 +60,5 @@ User.beforeUpdate(async (user) => {
 (async () => {
     await sequelize.sync({ force: false });
 })();
+
 module.exports = User;

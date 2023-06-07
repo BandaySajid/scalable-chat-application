@@ -27,21 +27,21 @@ function showAlert(data) {
     }, 4000);
 }
 
-function saveMessage(message) {
-    fetch('/chat/saveMessage', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: message
-    }).then((resp) => {
-        return resp.json();
-    }).then((data) => {
-        return data;
-    }).catch((err) => {
-        return err.message;
-    })
-}
+// function saveMessage(message) {
+//     fetch('/chat/saveMessage', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: message
+//     }).then((resp) => {
+//         return resp.json();
+//     }).then((data) => {
+//         return data;
+//     }).catch((err) => {
+//         return err.message;
+//     })
+// }
 
 const maxHeight = 0.15;
 const msgArea = document.querySelector("#message-area");
@@ -108,6 +108,6 @@ function sendMessage(e) {
         sentAt: getCurrentTime()
     };
     ws.send(JSON.stringify(messageData));
-    saveMessage(JSON.stringify(messageData))
+    // saveMessage(JSON.stringify(messageData))
     messageElem.value = '';
 };

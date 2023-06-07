@@ -1,7 +1,7 @@
 const redis = require('../db_config/redis');
 const crypto = require('crypto');
 
-async function saveSessionCache(userId, token, exp) {
+async function saveSession(userId, token, exp) {
     const sessionId = crypto.randomUUID();
     const data = JSON.stringify({
         token,
@@ -12,24 +12,25 @@ async function saveSessionCache(userId, token, exp) {
     return sessionId;
 };
 
-async function deleteSessionCache(req, reqType) {
-    if (reqType === 'deleteUser') {
-        const deletedSession = await redis.del(req.session);
+async function deleteSession(req, reqType) {
+    let deletedSession;
 
-        if (deletedSession === 0) {
-            throw new Error('no authorization tokens associated with the user!');
-        };
+    if (reqType === 'deleteUser') {
+        deletedSession = await redis.del(req.session);
+    }
+    else if (reqType === 'logoutFromAll') {
+        deletedSession = await redis.del(req.session);
     }
     else {
-        const deletedSession = await redis.LREM(req.session, 1, JSON.stringify({
+        deletedSession = await redis.LREM(req.session, 1, JSON.stringify({
             token: req.token,
             userId: req.user.userId
         }));
-
-        if (deletedSession === 0) {
-            throw new Error('authorization token does not exist!');
-        };
     }
+
+    if (deletedSession === 0) {
+        throw new Error('no authorization tokens associated with the user!');
+    };
 };
 
 async function verifyCache(key, type) {
@@ -56,4 +57,4 @@ async function deleteCacheData(key, type) {
     };
 };
 
-module.exports = { saveSessionCache, deleteSessionCache, verifyCache, saveCacheData, deleteCacheData };
+module.exports = { saveSession, deleteSession, verifyCache, saveCacheData, deleteCacheData };

@@ -1,8 +1,7 @@
 const express = require('express');
 const router = new express.Router();
 const { auth } = require('../middlewares/auth');
-const Message = require('../models/message');
-const Room = require('../models/room');
+const { createRoom, getUserRooms, saveUserToRoom, getRoomMembers, leaveRoom } = require('../models/room');
 
 
 router.get('/createRoom', auth, (req, res) => {
@@ -12,20 +11,14 @@ router.get('/createRoom', auth, (req, res) => {
 });
 
 router.post('/createRoom', auth, async (req, res) => {
-    const reqRoomId = req.body.roomId.toLowerCase()
-    const room = new Room({
-        roomId: reqRoomId,
-        owner: req.user._id
-    });
+    const reqRoomId = req.body.roomId.toLowerCase();
     try {
-        const messageRoom = new Message({
-            messages: [],
+        await createRoom({
+            userId: req.user.userId,
+            username: req.user.username,
             roomId: reqRoomId
         });
-        await room.saveUserToRoom(req.user.username);
-        await messageRoom.save();
-        req.user.joinedRooms = req.user.joinedRooms.concat({ room: reqRoomId });
-        await req.user.save();
+
         res.cookie("currentRoom", reqRoomId, {
             // httpOnly: true,//change it later to make it secure, as it will not be accessed using http
             maxAge: 3600000,
@@ -38,13 +31,8 @@ router.post('/createRoom', auth, async (req, res) => {
         });
     }
     catch (err) {
-        let errMsg;
-        if (err.message.includes('duplicate')) {
-            errMsg = Object.keys(err.keyValue) + ` already exists`;
-        }
-        else {
-            errMsg = err.message;
-        }
+        console.log(err);
+        let errMsg = err.message.includes('exists') ? err.message : 'an error occured';
         return res.status(500).json({
             status: 'error',
             description: errMsg
@@ -62,20 +50,7 @@ router.get('/joinRoom', auth, (req, res) => {
 router.post('/joinRoom', auth, async (req, res) => {
     try {
         const reqRoomId = req.body.roomId.toLowerCase()
-        const room = await Room.findOne({ roomId: reqRoomId });
-        if (!room) {
-            throw new Error('room does not exist');
-        }
-
-        const alreadyExists = req.user.joinedRooms.find((roomId) => {
-            return roomId.room === reqRoomId;
-        });
-
-        if (!alreadyExists) {
-            req.user.joinedRooms = req.user.joinedRooms.concat({ room: reqRoomId });
-            await room.saveUserToRoom(req.user.username);
-            await req.user.save();
-        }
+        await saveUserToRoom({ userId: req.user.userId, username: req.user.username, roomId: reqRoomId, owner: false });
 
         res.cookie("currentRoom", reqRoomId, {
             maxAge: 3600000,
@@ -90,6 +65,7 @@ router.post('/joinRoom', auth, async (req, res) => {
         });
     }
     catch (err) {
+        console.log(err.message);
         return res.status(500).json({
             status: 'error',
             description: err.message
@@ -99,16 +75,14 @@ router.post('/joinRoom', auth, async (req, res) => {
 
 router.post('/leaveRoom', auth, async (req, res) => {
     try {
-        req.user.joinedRooms = req.user.joinedRooms.filter((room) => {
-            return room.room !== req.body.room;
-        });
-        await req.user.save();
+        await leaveRoom(req.user.userId, req.body.roomId, req.user.username);
         return res.status(200).json({
             status: 'success',
-            description: 'room has been successfully left'
+            description: 'room left successfully'
         });
     }
     catch (err) {
+        console.log(err.message);
         return res.status(500).json({
             status: 'error',
             description: err.message
@@ -116,19 +90,12 @@ router.post('/leaveRoom', auth, async (req, res) => {
     }
 });
 
-router.get('/relatedRooms', auth, async (req, res) => {
+router.get('/userRooms', auth, async (req, res) => {
     try {
-        await req.user.populate({
-            path: 'ownedRooms',
-        });
+        const joinedRooms = await getUserRooms(req.user.userId, 'joined');
 
-        const ownedRooms = req.user.ownedRooms.map((room) => {
-            return room.roomId;
-        });
+        const ownedRooms = await getUserRooms(req.user.userId, 'owned');
 
-        const joinedRooms = req.user.joinedRooms.map((room) => {
-            return room.room;
-        });
         res.status(200).json({
             status: 'success',
             joinedRooms,
@@ -136,6 +103,7 @@ router.get('/relatedRooms', auth, async (req, res) => {
         });
     }
     catch (err) {
+        console.log(err.message);
         return res.status(500).json({
             status: 'error',
             description: err.message
