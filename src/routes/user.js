@@ -51,8 +51,9 @@ router.post('/signup', async (req, res) => {
         res.cookie('authorization', sessionId, {sameSite : true, secure : true });
         res.cookie('username', newUser.username, {sameSite : true, secure : true });
 
-        res.status(201).json({
-            status: 'user signed up successfully',
+        res.status(302).json({
+            status: 'success',
+            description : 'user signed up successfully',
             user: newUser
         });
     }
@@ -119,8 +120,9 @@ router.post('/login', async (req, res) => {
         res.cookie('username', newUser.username, {sameSite : true, secure : true });
 
 
-        res.status(201).json({
-            status: 'user logged in successfully',
+        res.status(302).json({
+            status: 'success',
+            description : 'user logged in successfully',
             user: newUser
         });
     }

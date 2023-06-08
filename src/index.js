@@ -13,6 +13,7 @@ const { ensureAuth } = require('./middlewares/auth');
 const { roomUserAuthenticated } = require('./models/room');
 const { roomEvent, saveMessage } = require('./models/room');
 const redis = require('./db_config/redis');
+const crypto = require('crypto');
 require('dotenv').config();
 
 const app = express();
@@ -74,19 +75,20 @@ const rooms = {
 
 //pub-sub
 const listener = async (message, channel) => {
-    const socketId = message.socketId;
-    delete message.socket;
-    console.log(message, channel);
+    const socketId = JSON.parse(message).socketId;
+    if (message.socketId) {
+        delete message.socketId;
+    }
     if (JSON.parse(message).status === 'join') {
         rooms[channel].clients.forEach((client) => {
-            if (client.socket.id !== socketId) {
+            if (client.socket._uid !== socketId) {
                 client.socket.send(message);
             }
         });
     }
     else if (JSON.parse(message).status === 'left') {
         rooms[channel].clients.forEach((client) => {
-            if (client.socket.id !== socketId) {
+            if (client.socket._uid !== socketId) {
                 client.socket.send(message);
             }
         });
@@ -111,18 +113,18 @@ roomEvent.on('delete', async function (roomId) {
 
 //Socket Handling
 wsS.on('connection', async (socket, req) => {
+    socket._uid = crypto.randomUUID();
     let usernameCookie, currentRoom;
     try {
         const cookies = req.headers.cookie.split('; ');
-        cookies.map((cookie, i)=>{
-            if(cookie.includes('username')){
+        cookies.map((cookie, i) => {
+            if (cookie.includes('username')) {
                 usernameCookie = cookie.split('=')[1];
             }
-            if(cookie.includes('currentRoom')){
+            if (cookie.includes('currentRoom')) {
                 currentRoom = cookie.split('=')[1];
             }
         })
-        console.log(cookies)
     }
     catch (err) {
         console.log(err);
@@ -147,7 +149,7 @@ wsS.on('connection', async (socket, req) => {
     await redis.publish(currentRoom, JSON.stringify({
         status: 'join',
         message: `${usernameCookie} has joined the room`,
-        socketId: socket.id
+        socketId: socket._uid
     }));
 
     console.log('a client connected to websockets');
@@ -163,7 +165,7 @@ wsS.on('connection', async (socket, req) => {
         await redis.publish(currentRoom, JSON.stringify({
             status: 'left',
             message: `${usernameCookie} has left the room`,
-            socket
+            socketId: socket._uid
         }));
 
         rooms[currentRoom].clients = rooms[currentRoom].clients.filter((client) => {

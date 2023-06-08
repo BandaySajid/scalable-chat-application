@@ -1,4 +1,5 @@
 const ws = new WebSocket('ws://127.0.0.1:9090');
+// const ws = new WebSocket('wss://98d5-117-214-241-24.ngrok-free.app/');
 const msgContainer = document.querySelector('.msgContainer');
 msgContainer.scrollTop = msgContainer.scrollHeight;
 
@@ -26,22 +27,6 @@ function showAlert(data) {
         alert.remove();
     }, 4000);
 }
-
-// function saveMessage(message) {
-//     fetch('/chat/saveMessage', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: message
-//     }).then((resp) => {
-//         return resp.json();
-//     }).then((data) => {
-//         return data;
-//     }).catch((err) => {
-//         return err.message;
-//     })
-// }
 
 const maxHeight = 0.15;
 const msgArea = document.querySelector("#message-area");
