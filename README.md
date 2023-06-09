@@ -4,7 +4,7 @@ Key Features:
 
 `Real-Time Communication`: Leveraging the power of WebSockets, the Scalable Chat Application enables users to engage in instant messaging, ensuring smooth and responsive conversations.
 
-`Scalability`: The application has been meticulously architected to handle a large number of concurrent users. By utilizing the robust Redis Pub/Sub system, the application ensures efficient message distribution, resulting in reliable performance even as the user base grows.
+`Scalability`: The application has been architected to handle a large number of concurrent users. By utilizing the robust Redis Pub/Sub system, the application ensures efficient message distribution, resulting in reliable performance even as the user base grows.
 
 `Authentication`: Robust user authentication mechanisms have been integrated into the application, ensuring secure and authorized access. This guarantees that only registered users can participate in the chat, protecting sensitive data and maintaining privacy.
 
