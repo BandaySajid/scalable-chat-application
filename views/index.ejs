@@ -27,20 +27,20 @@
                 </h1>
                 <ul class="chat-sidebar joined-room-list flex-column mb-auto text-center">
                     <% for(var i=0; i<joinedRooms.length; i++) {%>
-                        <li class="nav-item joined-room-item">
+                        <li class="nav-item joined-room-item" id="<%= joinedRooms[i]%>">
                             <h1 class="nav-link text-white">
                                 <%= joinedRooms[i]%>
                             </h1>
-                            <button class="btn btn-success btn-sm joinBtn">JOIN</button> <button
-                                class="btn btn-danger btn-sm leaveBtn" onclick="leaveRoom(event)">DELETE</button>
+                            <button class="btn btn-success btn-sm joinBtn" onclick="joinRoom(event)">JOIN</button>
+                            <button class="btn btn-danger btn-sm leaveBtn" onclick="leaveRoom(event)">DELETE</button>
                         </li>
                         <% } %>
                 </ul>
 
-                <hr style="color: white;">
+                <!-- <hr style="color: white;"> -->
 
 
-                <h1 class="d-flex justify-content-center flex-column text-decoration-none text-center">
+                <!-- <h1 class="d-flex justify-content-center flex-column text-decoration-none text-center">
                     <span class="fs-6 text-warning mb-1">Owned Rooms</span>
                 </h1>
                 <ul class="chat-sidebar owned-room-list flex-column mb-auto text-center">
@@ -49,11 +49,11 @@
                             <h1 class="nav-link text-white">
                                 <%= ownedRooms[i]%>
                             </h1>
-                            <button class="btn btn-success btn-sm joinBtn">JOIN</button> <button
-                                class="btn btn-danger btn-sm leaveBtn" onclick="leaveRoom(event)">DELETE</button>
+                            <button class="btn btn-success btn-sm joinBtn" onclick="joinRoom(event)">JOIN</button>
+                            <button class="btn btn-danger btn-sm leaveBtn" onclick="leaveRoom(event)">DELETE</button>
                         </li>
                         <% } %>
-                </ul>
+                </ul> -->
             </div>
         </div>
 

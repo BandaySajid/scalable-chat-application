@@ -5,7 +5,6 @@ const redis = require('../db_config/redis');
 async function ensureAuth(req) {
     const sessionId = req.cookies.authorization;
 
-    console.log(sessionId);
     if (!sessionId) {
         return { authenticated: false, decoded: null };
     };

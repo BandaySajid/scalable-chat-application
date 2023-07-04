@@ -13,14 +13,16 @@ function joinRoom(e) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            roomId,
-            username : getCookie("username")
+            roomId
         })
     }).then((response) => {
-        if (response.status === 200) {
+        if (response.redirected) {
+            window.location.href = response.url; // Redirect to the provided URL
+        }
+        else if (response.status === 200) {
             setTimeout(() => {
                 return window.location.href = '/chat';
-            }, 1000);
+            }, 500);
         }
         return response.json();
     })
@@ -28,6 +30,7 @@ function joinRoom(e) {
             showAlert(data);
         })
         .catch(error => {
+            console.error(error.message)
             const data = {
                 status: 'error',
                 description: 'Some error occured !'

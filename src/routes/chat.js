@@ -1,7 +1,7 @@
 const express = require('express');
 const router = new express.Router();
 const { auth } = require('../middlewares/auth');
-const { getMessageRoom, getRoomMembers } = require('../models/room');
+const { getMessageRoom } = require('../models/room');
 
 router.get('/chat', auth, async (req, res) => {
     try {
@@ -13,18 +13,15 @@ router.get('/chat', auth, async (req, res) => {
             return {
                 message: msg.message,
                 isOpponent: req.cookies.username === msg.username ? false : true,
-                username : msg.username,
-                sentAt : msg.sentAt
+                username: msg.username,
+                sentAt: msg.sentAt
             };
         });
-        
-        const roomUsers = await getRoomMembers(req.cookies.currentRoom);
-        
+
         res.render('chat', {
             pageTitle: 'chat',
             admin: owner,
-            roomUsers: roomUsers.members,
-            messages : messages,
+            messages: messages,
             roomId: req.cookies.currentRoom
         });
     }

@@ -7,6 +7,7 @@ const { auth, redirectIfLoggedIn } = require('../middlewares/auth');
 const validateUpdates = require('../utils/validateUpdates');
 const { saveSession, deleteSession } = require('../utils/redisFunctions');
 const { getUserRooms } = require('../models/room');
+const envCookies = require('../utils/envCookies.js');
 
 router.get('/', auth, async (req, res) => {
     try {
@@ -48,7 +49,7 @@ router.post('/signup', async (req, res) => {
         const sessionId = await saveSession(newUser.userId, token, 43200); // expiring after 5 days;
 
 
-        res.cookie('authorization', sessionId, { sameSite: true, secure: true, httpOnly: true });
+        res.cookie('authorization', sessionId, { ...envCookies(), sameSite: true });
         res.cookie('username', newUser.username, {
             httpOnly: true,
             secure: true,
@@ -118,18 +119,15 @@ router.post('/login', async (req, res) => {
         //saving session cache to redis
         const sessionId = await saveSession(newUser.userId, token, 43200); // expiring after 5 days;
 
-        console.log(sessionId)
 
         res.cookie('authorization', sessionId, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none', // Adjusted for cross-site compatibility
+            ...envCookies(), sameSite: true
         });
         res.cookie('username', newUser.username, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none', // Adjusted for cross-site compatibility
+            ...envCookies()
         });
+
+        console.log('auth', req.cookies.authorization);
 
 
         res.status(302).json({

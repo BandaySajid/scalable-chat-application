@@ -3,15 +3,15 @@ fetch('/getUserDetails', {
         method: 'GET',
         'Content-Type': 'application/json'
     }
-}).then((resp)=>{
+}).then((resp) => {
     return resp.json();
-}).then((data)=>{
-    if(data.status === 'success'){
-        Object.keys(data.user).forEach((key)=>{
+}).then((data) => {
+    if (data.status === 'success') {
+        Object.keys(data.user).forEach((key) => {
             localStorage.setItem(key, data.user[key]);
         });
     }
-}).catch((err)=>{
+}).catch((err) => {
     console.error(err.message);
 });
 
@@ -62,13 +62,64 @@ function getCurrentTime() {
 };
 
 ws.onmessage = function (msg) {
-    const message = JSON.parse(msg.data)
+    const message = JSON.parse(msg.data);
+    if (message.event === 'roomUsers') {
+        const elem = document.querySelector('.room-user-list');
+        elem.innerHTML = '';
+        message.users.map((username) => {
+            elem.innerHTML += `<div class="room-user-item">
+                <li class="nav-item joined-room-item">
+                <h1 class="nav-link text-white">
+                    ${username}
+                </h1>
+            </li>
+            <hr style="color: white;">
+        </div>`
+        });
+        return 
+    };
     if (message.status) {
         if (document.querySelector('#alert-container').innerHTML.length > 0) {
             document.querySelector('#alert-container').innerHTML = '';
         }
+        if (message.status === 'join') {
+            const elem = document.querySelector('.room-user-list');
+            elem.innerHTML = '';
+            message.users.map((username) => {
+                elem.innerHTML += `<div class="room-user-item">
+                <li class="nav-item joined-room-item">
+                <h1 class="nav-link text-white">
+                ${username}
+                </h1>
+                </li>
+                <hr style="color: white;">
+                </div>`
+            })
+        }
+        else if (message.status === 'left') {
+            if (message.users.length <= 0) {
+                document.querySelector('.room-user-list').innerHTML = `<div class="room-user-item">
+            <li class="nav-item joined-room-item">
+                <h1 class="nav-link text-white">
+                </h1>
+            </li>
+            <hr style="color: white;">
+        </div>`
+            }
+            message.users.map((username) => {
+                document.querySelector('.room-user-list').innerHTML = `<div class="room-user-item">
+            <li class="nav-item joined-room-item">
+                <h1 class="nav-link text-white">
+                    ${username}
+                </h1>
+            </li>
+            <hr style="color: white;">
+        </div>`
+            })
+        }
         return showAlert(message);
-    }
+    };
+
     const elem = document.createElement('div');
     if (message.username === localStorage.getItem('username')) {
         elem.classList.add('card', 'border-0', 'my-1', 'me-auto');

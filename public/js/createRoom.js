@@ -12,24 +12,22 @@ function createRoom(e) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            roomId,
-            username : getCookie('username')
+            roomId
         })
     }).then((response) => {
         if (response.status === 201) {
             setTimeout(() => {
                 return window.location.href = '/chat';
-            }, 1000);
+            }, 500);
         }
         return response.json();
     }).then(data => {
         showAlert(data);
-    })
-        .catch(error => {
-            const data = {
-                status: 'error',
-                description: 'Some error occured !'
-            };
-            showAlert(data);
-        });
+    }).catch(error => {
+        const data = {
+            status: 'error',
+            description: 'Some error occured !'
+        };
+        showAlert(data);
+    });
 }

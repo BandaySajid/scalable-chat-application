@@ -32,17 +32,14 @@
                 </h1>
                 <ul class="chat-sidebar room-user-list flex-column mb-auto">
 
-                    <% for(var i=0; i<roomUsers.length; i++) {%>
-                        <div class="room-user-item">
-                            <li class="nav-item joined-room-item">
-                                <h1 class="nav-link text-white">
-                                    <%= roomUsers[i]%>
-                                </h1>
-                            </li>
-                            <hr style="color: white;">
-                        </div>
-
-                        <% } %>
+                    <div class="room-user-item">
+                        <li class="nav-item joined-room-item">
+                            <h1 class="nav-link text-white">
+                                You
+                            </h1>
+                        </li>
+                        <hr style="color: white;">
+                    </div>
                 </ul>
 
             </div>

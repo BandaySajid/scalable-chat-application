@@ -73,43 +73,44 @@ const rooms = {
 
 };
 
+const roomUsers = new Map();
+
 //pub-sub
 const listener = async (message, channel) => {
-    const socketId = JSON.parse(message).socketId;
+    message = JSON.parse(message);
+    const socketId = message.socketId;
     if (message.socketId) {
         delete message.socketId;
     }
-    if (JSON.parse(message).status === 'join') {
+    if (message.status === 'join') {
         rooms[channel].clients.forEach((client) => {
             if (client.socket._uid !== socketId) {
-                client.socket.send(message);
+                client.socket.send(JSON.stringify(message));
             }
         });
     }
-    else if (JSON.parse(message).status === 'left') {
+    else if (message.status === 'left') {
         rooms[channel].clients.forEach((client) => {
             if (client.socket._uid !== socketId) {
-                client.socket.send(message);
+                client.socket.send(JSON.stringify(message));
             }
         });
     }
     else {
         rooms[channel].clients.forEach((client) => {
-            client.socket.send(message);
+            client.socket.send(JSON.stringify(message));
         });
-        await saveMessage(channel, message);
+        await saveMessage(channel, JSON.stringify(message));
     }
 };
 
 roomEvent.on('create', async function (roomId) {
-    console.log('room created');
     subscriber.subscribe(roomId, listener);
 });
 
 roomEvent.on('delete', async function (roomId) {
     subscriber.unsubscribe(roomId, listener);
 });
-
 
 //Socket Handling
 wsS.on('connection', async (socket, req) => {
@@ -137,6 +138,13 @@ wsS.on('connection', async (socket, req) => {
         socket.close(1000, 'unauthorized room user, user not a part of this room');
     }
 
+    roomUsers.set(usernameCookie, usernameCookie);
+
+    socket.send(JSON.stringify({
+        event: 'roomUsers',
+        users: Array.from(roomUsers.keys())
+    }));
+
     if (!rooms[currentRoom]) {
         Object.assign(rooms, { [currentRoom]: { clients: [] } });
     }
@@ -149,7 +157,8 @@ wsS.on('connection', async (socket, req) => {
     await redis.publish(currentRoom, JSON.stringify({
         status: 'join',
         message: `${usernameCookie} has joined the room`,
-        socketId: socket._uid
+        socketId: socket._uid,
+        users: Array.from(roomUsers.keys())
     }));
 
     console.log('a client connected to websockets');
@@ -158,19 +167,23 @@ wsS.on('connection', async (socket, req) => {
     });
 
     socket.on('close', async (code) => {
-        console.log(code);
         if (code === 1000) {
             return
         }
-        await redis.publish(currentRoom, JSON.stringify({
-            status: 'left',
-            message: `${usernameCookie} has left the room`,
-            socketId: socket._uid
-        }));
 
         rooms[currentRoom].clients = rooms[currentRoom].clients.filter((client) => {
             return client.socket !== socket;
         });
+
+        roomUsers.delete(usernameCookie);
+
+        await redis.publish(currentRoom, JSON.stringify({
+            status: 'left',
+            message: `${usernameCookie} has left the room`,
+            socketId: socket._uid,
+            users: Array.from(roomUsers.keys())
+
+        }));
 
         console.log('client has left');
     });
