@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config();
 const path = require('path');
 const PORT = process.env.PORT || 9090;
 const { WebSocketServer } = require('ws');
@@ -14,7 +15,6 @@ const { roomUserAuthenticated } = require('./models/room');
 const { roomEvent, saveMessage } = require('./models/room');
 const redis = require('./db_config/redis');
 const crypto = require('crypto');
-require('dotenv').config();
 
 const app = express();
 app.set('view engine', 'ejs');
