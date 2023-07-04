@@ -139,10 +139,10 @@ wsS.on('connection', async (socket, req) => {
     }
 
     if (!roomUsers[currentRoom]) {
-        Object.assign(rooms, { [currentRoom]: new Map });
+        roomUsers[currentRoom] = new Map();
     }
 
-    roomUsers[currentRoom].users.set(usernameCookie, usernameCookie);
+    roomUsers[currentRoom].set(usernameCookie, usernameCookie);
 
     socket.send(JSON.stringify({
         event: 'roomUsers',
