@@ -139,14 +139,14 @@ wsS.on('connection', async (socket, req) => {
     }
 
     if (!roomUsers[currentRoom]) {
-        Object.assign(rooms, { [currentRoom]: { users: new Map() } });
+        Object.assign(rooms, { [currentRoom]: new Map });
     }
 
     roomUsers[currentRoom].users.set(usernameCookie, usernameCookie);
 
     socket.send(JSON.stringify({
         event: 'roomUsers',
-        users: Array.from(roomUsers[currentRoom].users.keys())
+        users: Array.from(roomUsers[currentRoom].keys())
     }));
 
     if (!rooms[currentRoom]) {
@@ -162,7 +162,7 @@ wsS.on('connection', async (socket, req) => {
         status: 'join',
         message: `${usernameCookie} has joined the room`,
         socketId: socket._uid,
-        users: Array.from(roomUsers[currentRoom].users.keys())
+        users: Array.from(roomUsers[currentRoom].keys())
     }));
 
     console.log('a client connected to websockets');
@@ -185,7 +185,7 @@ wsS.on('connection', async (socket, req) => {
             status: 'left',
             message: `${usernameCookie} has left the room`,
             socketId: socket._uid,
-            users: Array.from(roomUsers[currentRoom].users.keys())
+            users: Array.from(roomUsers[currentRoom].keys())
 
         }));
 
