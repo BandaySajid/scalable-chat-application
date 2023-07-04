@@ -138,7 +138,7 @@ wsS.on('connection', async (socket, req) => {
         socket.close(1000, 'unauthorized room user, user not a part of this room');
     }
 
-    if (!roomsUsers[currentRoom]) {
+    if (!roomUsers[currentRoom]) {
         Object.assign(rooms, { [currentRoom]: { users: new Map() } });
     }
 
