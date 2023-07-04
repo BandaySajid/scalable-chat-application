@@ -48,12 +48,16 @@ router.post('/signup', async (req, res) => {
         const sessionId = await saveSession(newUser.userId, token, 43200); // expiring after 5 days;
 
 
-        res.cookie('authorization', sessionId, {sameSite : true, secure : true });
-        res.cookie('username', newUser.username, {sameSite : true, secure : true });
+        res.cookie('authorization', sessionId, { sameSite: true, secure: true });
+        res.cookie('username', newUser.username, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none', // Adjusted for cross-site compatibility
+        })
 
         res.status(302).json({
             status: 'success',
-            description : 'user signed up successfully',
+            description: 'user signed up successfully',
             user: newUser
         });
     }
@@ -116,13 +120,21 @@ router.post('/login', async (req, res) => {
 
         console.log(sessionId)
 
-        res.cookie('authorization', sessionId, { sameSite : true, secure : true });
-        res.cookie('username', newUser.username, {sameSite : true, secure : true });
+        res.cookie('authorization', sessionId, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none', // Adjusted for cross-site compatibility
+        });
+        res.cookie('username', newUser.username, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none', // Adjusted for cross-site compatibility
+        });
 
 
         res.status(302).json({
             status: 'success',
-            description : 'user logged in successfully',
+            description: 'user logged in successfully',
             user: newUser
         });
     }

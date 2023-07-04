@@ -20,11 +20,13 @@ router.post('/createRoom', auth, async (req, res) => {
         });
 
         res.cookie("currentRoom", reqRoomId, {
-            // httpOnly: true,//change it later to make it secure, as it will not be accessed using http
             maxAge: 3600000,
-            sameSite: true,
-            secure: true
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none', // Adjusted for cross-site compatibility
         });
+
+
         return res.status(201).json({
             status: 'success',
             description: 'room has been created'
@@ -54,9 +56,9 @@ router.post('/joinRoom', auth, async (req, res) => {
 
         res.cookie("currentRoom", reqRoomId, {
             maxAge: 3600000,
-            // httpOnly: true,//change it later to make it secure, as it will not be accessed using http
-            sameSite: true,
-            secure: true
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none', // Adjusted for cross-site compatibility
         });
 
         res.status(200).json({
