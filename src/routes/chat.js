@@ -17,11 +17,8 @@ router.get('/chat', auth, async (req, res) => {
                 sentAt : msg.sentAt
             };
         });
-
-        console.log(messages);
         
         const roomUsers = await getRoomMembers(req.cookies.currentRoom);
-        console.log(roomUsers);
         
         res.render('chat', {
             pageTitle: 'chat',

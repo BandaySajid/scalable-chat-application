@@ -48,12 +48,12 @@ router.post('/signup', async (req, res) => {
         const sessionId = await saveSession(newUser.userId, token, 43200); // expiring after 5 days;
 
 
-        res.cookie('authorization', sessionId, { sameSite: true, secure: true });
+        res.cookie('authorization', sessionId, { sameSite: true, secure: true, httpOnly: true });
         res.cookie('username', newUser.username, {
             httpOnly: true,
             secure: true,
             sameSite: 'none', // Adjusted for cross-site compatibility
-        })
+        });
 
         res.status(302).json({
             status: 'success',
@@ -148,6 +148,25 @@ router.post('/login', async (req, res) => {
     };
 });
 
+
+//getUserDetails
+router.get('/getUserDetails', auth, async (req, res) => {
+    try {
+        const userDetails = {
+            username: req.user.username,
+            room: req.cookies.currentRoom
+        };
+
+        res.status(200).json({ status: 'success', user: userDetails });
+    }
+    catch (err) {
+        console.log(err.message);
+        res.status(400).json({
+            status: 'error',
+            description: 'an error occured'
+        });
+    };
+});
 
 
 //Update

@@ -1,3 +1,20 @@
+fetch('/getUserDetails', {
+    headers: {
+        method: 'GET',
+        'Content-Type': 'application/json'
+    }
+}).then((resp)=>{
+    return resp.json();
+}).then((data)=>{
+    if(data.status === 'success'){
+        Object.keys(data.user).forEach((key)=>{
+            localStorage.setItem(key, data.user[key]);
+        });
+    }
+}).catch((err)=>{
+    console.error(err.message);
+});
+
 const ws = new WebSocket('ws://127.0.0.1:9090');
 // const ws = new WebSocket('wss://98d5-117-214-241-24.ngrok-free.app/');
 const msgContainer = document.querySelector('.msgContainer');
@@ -53,7 +70,7 @@ ws.onmessage = function (msg) {
         return showAlert(message);
     }
     const elem = document.createElement('div');
-    if (message.username === getCookie('username')) {
+    if (message.username === localStorage.getItem('username')) {
         elem.classList.add('card', 'border-0', 'my-1', 'me-auto');
         elem.innerHTML = `<div class="card-body ms-auto d-flex flex-column">
         <div class="ms-auto">
@@ -87,8 +104,8 @@ function sendMessage(e) {
     const messageElem = document.querySelector("#message-area");
     e.preventDefault();
     const messageData = {
-        username: getCookie("username"),
-        room: getCookie("currentRoom"),
+        username: localStorage.getItem("username"),
+        room: localStorage.getItem("room"),
         message: messageElem.value,
         sentAt: getCurrentTime()
     };

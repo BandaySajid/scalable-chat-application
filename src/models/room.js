@@ -155,7 +155,6 @@ async function getMessageRoom(roomId) {
 
     const owner = await redis.HGET(identifier, 'owner');
     const messages = await redis.lRange(identifier + ':messages', 0, -1);
-    console.log(messages);
 
     return { owner, messages };
 }
