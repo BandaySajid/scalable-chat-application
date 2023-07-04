@@ -5,12 +5,12 @@ const envCookies = () => {
         return {
             httpOnly: true,
             secure: true,
-            sameSite: 'none', // Adjusted for cross-site compatibility
+            sameSite: true
         }
     }
     else if (process.env.ENV === 'DEV') {
         return {
-            sameSite: true, // Adjusted for cross-site compatibility
+            sameSite: true
         }
     }
 
