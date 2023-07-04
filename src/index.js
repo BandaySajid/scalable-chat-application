@@ -179,7 +179,7 @@ wsS.on('connection', async (socket, req) => {
             return client.socket !== socket;
         });
 
-        roomUsers[currentRoom].users.delete(usernameCookie);
+        roomUsers[currentRoom].delete(usernameCookie);
 
         await redis.publish(currentRoom, JSON.stringify({
             status: 'left',
