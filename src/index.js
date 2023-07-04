@@ -73,7 +73,7 @@ const rooms = {
 
 };
 
-const roomUsers = new Map();
+const roomUsers = {};
 
 //pub-sub
 const listener = async (message, channel) => {
@@ -138,11 +138,13 @@ wsS.on('connection', async (socket, req) => {
         socket.close(1000, 'unauthorized room user, user not a part of this room');
     }
 
-    roomUsers.set(usernameCookie, usernameCookie);
+    roomUsers[currentRoom].users = {};
+
+    roomUsers[currentRoom].users.set(usernameCookie, usernameCookie);
 
     socket.send(JSON.stringify({
         event: 'roomUsers',
-        users: Array.from(roomUsers.keys())
+        users: Array.from(roomUsers[currentRoom].users.keys())
     }));
 
     if (!rooms[currentRoom]) {
@@ -158,7 +160,7 @@ wsS.on('connection', async (socket, req) => {
         status: 'join',
         message: `${usernameCookie} has joined the room`,
         socketId: socket._uid,
-        users: Array.from(roomUsers.keys())
+        users: Array.from(roomUsers[currentRoom].users.keys())
     }));
 
     console.log('a client connected to websockets');
@@ -175,13 +177,13 @@ wsS.on('connection', async (socket, req) => {
             return client.socket !== socket;
         });
 
-        roomUsers.delete(usernameCookie);
+        roomUsers[currentRoom].users.delete(usernameCookie);
 
         await redis.publish(currentRoom, JSON.stringify({
             status: 'left',
             message: `${usernameCookie} has left the room`,
             socketId: socket._uid,
-            users: Array.from(roomUsers.keys())
+            users: Array.from(roomUsers[currentRoom].users.keys())
 
         }));
 
