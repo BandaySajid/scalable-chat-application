@@ -138,7 +138,9 @@ wsS.on('connection', async (socket, req) => {
         socket.close(1000, 'unauthorized room user, user not a part of this room');
     }
 
-    roomUsers[currentRoom].users = {};
+    if (!roomsUsers[currentRoom]) {
+        Object.assign(rooms, { [currentRoom]: { users: new Map() } });
+    }
 
     roomUsers[currentRoom].users.set(usernameCookie, usernameCookie);
 
