@@ -1,0 +1,22 @@
+version: '3'
+services:
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - redis
+      - mysql
+    links:
+      - redis
+      - mysql
+
+  redis:
+    image: redis:latest
+
+  mysql:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=72543
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
