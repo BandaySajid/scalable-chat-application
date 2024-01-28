@@ -1,4 +1,4 @@
-This project is a demonstration of backend solution focused on efficient `real-time communication`. Uses cutting-edge technologies such as `WebSockets`, `Redis Pub/Sub`, `authentication`, `security measures`, and `caching`.
+This project is a demonstration of backend solution focused on efficient `real-time communication`. Uses cutting-edge technologies such as `WebSockets`, `Redis Pub/Sub` and `caching`.
 
 Key Features:
 
